@@ -88,3 +88,25 @@ priority is 7 then any thread with in that group can have a maximum of 7.
 **Example** -
 Let's say in software installer app, the thread that copies the files should be given more priority than the thread which display the progress 
 etc, that speeds up the installation process.
+
+## Thread Group
+
+ - **Thread.currentThread()** - currentThread() is a static method in the class Thread and all the static method in the Thread class normally operate on the thread in which it is being executed. Here Thread.currentThread() returns a reference to the current thread i.e. the main thread.
+
+- **Thread.getThreadGroup()** - A Thread class method that returns a reference to the ThreadGroup to which the corresponding thread instance belongs.
+
+- **ThreadGroup.getParent()** - A ThreadGroup class method that returns a reference to the parent thread group if any. If there is no parent then this method returns null.
+
+- **ThreadGroup.setMaxPriority(int maxPriority)** - Sets the maximum priority for that group so that no thread can exceed this priority with in the group.
+
+## Daemon Thread
+Daemon threads are the ones which does not prevent the JVM from exiting the application once it finishes. Daemon threads are handy for performing background tasks such as garbage collection or collecting application statistics etc. Note that the Java Virtual Machine exits when the only threads running are all daemon threads.
+
+
+## Callable interface 
+Unlike Runnable, Callable interface allows us to create an asynchronous task which is capable of returning an Object.
+
+interface Callable<V> {
+    V call() throws Exception;
+}
+If we implement Callable interface then you we return the result as well unlike Runnable interface. Just need to override the call() method. 
