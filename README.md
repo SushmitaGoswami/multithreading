@@ -378,7 +378,7 @@ Optionally Bounded, based on linked nodes i.e. nothing but the linked list. It t
 
 Unbounded. Objects should be Comparable or you should provide a Comparator.
 
-### BlockingQueue operations
+#### BlockingQueue operations
 
 1. Operations that throw Exception if the operation fails.
 
@@ -407,3 +407,5 @@ Unbounded. Objects should be Comparable or you should provide a Comparator.
 - **offer(o, timeout, timeunit)**
 - **poll(timeout, timeunit)**
 
+#### PriorityBlockingQueue -
+PriorityBlockingQueue orders the elements through natural order if they are Comparable or we should use the Comparator.
