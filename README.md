@@ -286,3 +286,51 @@ Now consider the execution sequence (1)(a)(2)(3)(b)(c)
 You can see that list object is locked by Thread1 and hence even when the control switched to Thread2 it can not proceed as the lock is with Thread1. And Thread1 will add the element where as Thread2 will fail.
 
 So when it comes to synchronizing operations synchronized blocks are always better choice over synchronized methods.
+
+## Deadlock -
+Two threads are said to be in a deadlock when both the threads are circularly waiting for a lock over the object and hence they both get into a situation where they can not proceed with the execution.
+
+![image](https://user-images.githubusercontent.com/20486206/122676141-3b309180-d1fa-11eb-88eb-9581cb1b039d.png)
+
+## Reentrant Locks
+
+### Read/Write Lock -
+Read/Write Lock gives us more flexibility during locking and unlocking. Based on the type of operation being performed over the object we can segregate the locks into
+
+- **readLock** - readLock allows us to lock the object for read operation, and the interesting point is that the read operation can be shared i.e if two threads are waiting for readLock then both of them can proceed forward with the operation as read operation doesn't change the data.
+
+- **writeLock** - Where as writeLock is mutually exclusive i.e. if a writeLock is accepted then all the other lock requests should wait till the thread that owns the lock releases it.
+
+### Example - 
+Let us assume the following chronologically ordered lock requests
+
+```
+T1 -> lock.readLock();
+
+T2 -> lock.readLock();
+
+T3 -> lock.readLock();
+
+T4 -> lock.writeLock();
+
+T5 -> lock.readLock();
+```
+
+>Here T1, T2, T3 can share the readLock and proceed forward with the operation.  Where T4 should wait till T1, T2 and T3 unlocks.
+
+**Why T5 is waiting ?**
+
+Because writeLock is requested by T4 before its request and hence all subsequent requests to read/write locks should wait.
+
+This is in contrast to synchronized methods/blocks because for synchronized method/block there is no segregation of read and write operations. Object is locked no matter whether it is read or write.
+
+## Thread signalling using wait() and notify() -
+Threads can signal each other using the wait and notify methods. wait(), notify() and notifyAll() are the methods of the class Object and hence they are part of all the objects. Just think about a scenario where one thread waits for a signal from some other thread in order to proceed with the execution.
+
+- **wait()** - This method Releases the lock over the object and takes the thread to WAITING state. And the thread remains in that state until some other thread calls the notify() method over the same object. Once notify() is invoked it ends the wait for one single thread and takes the thread to BLOCKED state where the thread remains in that state till the lock is obtained. wait() only returns after obtaining the lock.
+
+- **wait(long millis)** - This method slightly differs, as it takes thread to TIMED_WAITING and waits only for the specified duration.
+
+- **notify()** - This method notifies one single thread where as notifyAll() notifies all the threads waiting for the signal.
+
+>Note - In order to call the wait and notify methods the corresponding thread should hold the lock on the object using synchronized method or block.
