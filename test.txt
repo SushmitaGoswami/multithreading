@@ -1,0 +1,160 @@
+## Thread Synchronization
+	Thread synchronization is used to solve concurrency problems that exist in parallel processing. Concurrency problem exist when more than one thread is accessing the same shared resource. 
+
+### Thread Safe Code or Re-entrant code
+	When a code block is safe from concurrency problems then the code is referred as thread safe or re-entrant.
+
+### Synchronization in Java Threads
+	There can be following scenarios when we need different ways of synchronization based on the situation
+	a. Let's say, there is a single object shared among multiple thread and each thread calls some method on that object.
+	b. Let's say, each thread has its own object, but the object has a static variable being operated on by the thread.
+	c. Let's say, multiple thread operates on a single object of a third party class.
+
+
+ - **Synchronized methods (example)**
+
+	class Sample {
+		synchronized void f() {...}
+	}
+	Consider Three threads T1, T2, T3 and two objects for Sample they are A,B.
+
+	T1  ..........A.f();  locks A and proceeds
+
+	T2  ..........B.f();  locks B and proceeds
+
+	T3  ..........A.f();  wait till T1 unlocks A.
+
+	To run a synchronized method object must be locked.
+
+
+ - **Synchronized block (example)**
+	a. When synchronization is not required for the entire method i.e only certain part of the code must be synchronized then we use synchronized block.      
+    b. When there is a need to perform some operation on a third party non thread safe class object from a thread.
+
+	synchronized( object ) {
+	  // operations over the object
+	}
+    The above code is executed only after obtaining lock over the object.
+
+ - **Locks (example)**
+
+
+ ### Synchronizing static data operations -
+	Is the below increment() operation thread-safe ?
+
+	class Sample {
+	 
+		static int a = 5;
+		int b = 10;
+	 
+		public synchronized void increment( ) {
+			a++;
+			b++;
+		}
+	 
+		// ....
+	}
+	Answer is NO. Because we made it synchronized we may think that it is thread-safe but it is not. And it is because of the static variable a. Lets assume that there are two objects for Sample, in that case both of them will share the same copy of a because it is a class member, where as they get different copies of b, because b is non static i.e. the instance member and each instance will get a separate copy of b.
+
+	Assume Thread 1 invoked the increment method over the first object and Thread 2 invoked the increment method over the second object. Because the increment() method is non-static and it is synchronized, object should be locked before getting into the method.
+
+	Here Thread1 locks the first object and gets in and also Thread 2 locks the second object and gets in, because both are different objects and hence both the thread acquire locks and they both proceed with the operation.
+
+	You can see that b++ is not having any issues, because both the threads are operating on different copies of b, but what about a++ it is still not thread safe.
+
+	Solution 1 -
+	class Sample {
+	 
+		static int a = 5;
+		int b = 10;
+	 
+		public  void increment( ) {
+			// lock the Class object before modifying
+			// static content.
+			synchronized(Sample.class) {
+				a++;
+			}
+			
+			// lock the object before modifying 
+			// instance members.    
+			synchronized(this) {
+			b++;
+			}
+		}
+		
+		// ....
+	}
+	In this case the increment() operation is thread-safe, because for modifying the static member 'a' we are locking the class object, Sample.class returns a reference to class object and synchronized block will acquire lock over the object and then proceed forward with the operation. And for b++ we are locking the current object using the this reference. And hence both the operations are now thread-safe, as we properly locked the corresponding object before modification.
+
+	Solution 2 -
+	class Sample {
+	 
+		static int a = 5;
+		int b = 10;
+	 
+		// This method is static and hence it locks the Class object.
+		public static synchronized void incrementA( ) {
+		a++;
+		}
+	 
+		// This method is non static and hence it locks the object
+		// on which it is invoked.
+		public synchronized void increment( ) {
+			incrementA();
+		b++;
+		}
+	 
+		// ....
+	 
+	}
+	Create a static method for incrementing a and declare it as synchronized, so that when the thread enters this method it locks the class object. Just remember that whenever you are modifying the static content in a multi-threaded environment you should lock the class object to make your code thread-safe.
+
+	Issue with synchronized methods -
+	Synchronized methods doesn't always solve concurrency problems. Lets consider a simple List class and assume that the size() and add() operations are synchronized
+
+	class List {
+		...
+		public synchronized int size(){
+		...
+		}
+		public synchronized void add(Object value) {
+		....
+		}
+	}
+	You can think that there is no concurrency issue here. But, lets analyze a simple scenario consider that list should not contain more than 5 elements, and assume that list is already having 4 elements and two threads are trying to insert an element into the list.
+
+	Thread 1 -
+
+	1) if (list.size() < 5) {
+	2) 	list.add(value1);
+	   }
+	Thread 2 -
+
+	a) if (list.size() < 5) {
+	b) 	list.add(value2);
+	   }
+	Lets assume this execution sequence (1)(a)(2)(b) in this case both threads will see that list size is 4 and is less than 5. Hence both will add an element into the list, which makes the list size as 6 violating the condition. You can see the issue is not resolved even with both size() and add() being synchronized methods.
+
+	Solution -
+	You should apply thread synchronization at operation level with the help of synchronized block. i.e.
+
+	Thread 1 -
+
+	1) synhronized(list) {
+	2)   if (list.size() < 5) {
+	3) 	list.add(value1);
+		 }
+	   }
+	Thread 2 -
+
+	a) synchronized(list) {
+	b)   if (list.size() < 5) {
+	c) 	list.add(value2);
+		 }
+	   }
+	Now consider the execution sequence (1)(a)(2)(3)(b)(c)
+
+	You can see that list object is locked by Thread1 and hence even when the control switched to Thread2 it can not proceed as the lock is with Thread1. And Thread1 will add the element where as Thread2 will fail.
+
+	So when it comes to synchronizing operations synchronized blocks are always better choice over synchronized methods.
+
