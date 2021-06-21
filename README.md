@@ -409,3 +409,34 @@ Unbounded. Objects should be Comparable or you should provide a Comparator.
 
 #### PriorityBlockingQueue -
 PriorityBlockingQueue orders the elements through natural order if they are Comparable or we should use the Comparator.
+
+## Fork Join Framework -
+- Available from Java7
+
+- An ExecutorService for ForkJoinTasks
+
+- It differs from ExecutorService by virtue of employing Work-stealing. i.e. if a worker thread has no tasks in the pipeline it will take the task from the task queue of the other busy thread so that the workload is efficiently balanced.
+
+- To access the pool, A static common pool is available for the application and it can be accessed through commonPool() method of the ForkJoinPool class. Using the commonPool is the preferred approach because creating multiple thread pools might have an adverse impact on the performance of the application.
+```
+ForkJoinPool pool = ForkJoinPool.commonPool();
+```
+- For applications which need separate thread pools, we can construct the ForkJoinPool using the level of parallelism needed and by default it is equal to the number of processors. 
+```
+ForkJoinPool pool = new ForkJoinPool();
+```
+
+### What is fork, join ?
+![image](https://user-images.githubusercontent.com/20486206/122709398-cef67200-d27b-11eb-903e-c526e4bc0946.png)
+
+The primary thought process behind fork is that each task is recursively split into subtasks and executed in parallel where as the join operation will wait for the completion of the task and combines the obtained results. To make it simpler, lets assume that the task is to search 100,000 unordered elements and returns the number of occurrences of an element. Assume that, a task will perform the search operation on its own if the list size is 25000. Here the first tasks splits the total elements into two sets of size 50000  and at second level task will split that into two sets of size 25000 each,  and at this level it will not fork any subtasks because the size of the dataset is 25000 and as per our condition we shouLd not create sub tasks.
+
+This is how recursion works as well, there will be a base condition and upon reaching that condition recursive call would be stopped. Similarly here we should put a threshold condition where we will not further fork.
+
+### Types of ForkJoinTask(s)
+![image](https://user-images.githubusercontent.com/20486206/122709454-e7ff2300-d27b-11eb-9898-624301fe9c29.png)
+
+ForkJoinTask implements Future interface so we can use it to extract the results once the task is done. ForkJoinTask is further divided into two subtypes one is RecursiveAction and RecursiveTask. These classes are abstract; and when you extend you need to override the compute method. If it is a RecursiveAction the compute operation doesn't return any value. Where as in case of RecursiveTask we can return a value. You can relate that with Runnable and Callable.
+
+## Semaphore
+A semaphore controls access to a shared resource through the use of a counter. If the counter is greater than zero, then access is allowed. If it is zero, then access is denied. What the counter is counting are permits that allow access to the shared resource. Thus, to access the resource, a thread must be granted a permit from the semaphore.
