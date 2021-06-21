@@ -153,8 +153,6 @@ To run a synchronized method object must be locked.
 	}
     The above code is executed only after obtaining lock over the object.
 ```
- - **Locks (example)**
-
 
  ### Synchronizing static data operations
  Is the below increment() operation thread-safe ?
@@ -324,6 +322,25 @@ Because writeLock is requested by T4 before its request and hence all subsequent
 
 This is in contrast to synchronized methods/blocks because for synchronized method/block there is no segregation of read and write operations. Object is locked no matter whether it is read or write.
 
+## Blocking lock 
+```
+1. lock()
+2. 	read()
+3. 	increment()
+4. 	write()
+5. unlock()
+```
+## Non Blocking lock - Using an Atomic operation
+```
+1. do{
+2.    oldValue = read()
+3.    newValue = increment()
+4.    success = compareAndSetValue(oldValue, newValue)
+5. } while(!success);   
+```
+
+
+
 ## Thread signalling using wait() and notify() -
 Threads can signal each other using the wait and notify methods. wait(), notify() and notifyAll() are the methods of the class Object and hence they are part of all the objects. Just think about a scenario where one thread waits for a signal from some other thread in order to proceed with the execution.
 
@@ -440,3 +457,9 @@ ForkJoinTask implements Future interface so we can use it to extract the results
 
 ## Semaphore
 A semaphore controls access to a shared resource through the use of a counter. If the counter is greater than zero, then access is allowed. If it is zero, then access is denied. What the counter is counting are permits that allow access to the shared resource. Thus, to access the resource, a thread must be granted a permit from the semaphore.
+
+## CountDownLatch 
+CountDownLatch is used to make sure that a task waits for other threads before it starts. To understand its application, let us consider a server where the main task can only start when all the required services have started.
+
+## CyclicBarrier
+A CyclicBarrier is a synchronizer that allows a set of threads to wait for each other to reach a common execution point, also called a barrier. CyclicBarriers are used in programs in which we have a fixed number of threads that must wait for each other to reach a common point before continuing execution.
